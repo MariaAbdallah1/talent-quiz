@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار المواهب</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family:'Cairo',sans-serif;
+  margin:0;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:#333;
+}
+
+.container {
+  max-width:600px;
+  margin:40px auto;
+  background:white;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.2);
+  text-align:center;
+}
+
+.progress {
+  height:8px;
+  background:#eee;
+  border-radius:10px;
+  margin-bottom:20px;
+  overflow:hidden;
+}
+
+.progress-bar {
+  height:100%;
+  width:0;
+  background:#ff7eb3;
+  transition:0.4s;
+}
+
+.question {
+  font-size:18px;
+  margin-bottom:20px;
+}
+
+.option {
+  display:block;
+  margin:10px 0;
+  padding:12px;
+  border-radius:12px;
+  background:#f7f8ff;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.option:hover {
+  background:#e6e9ff;
+  transform:scale(1.03);
+}
+
+.hidden {display:none;}
+
+.result {margin-top:20px;}
+
+.badge {
+  margin:10px auto;
+  padding:12px;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  animation:fadeIn 0.5s;
+}
+
+.desc {
+  font-size:14px;
+  color:#555;
+}
+
+@keyframes fadeIn {
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>✨ اكتشفي موهبتك ✨</h2>
+
+  <div class="progress">
+    <div class="progress-bar" id="bar"></div>
+  </div>
+
+  <div id="quiz"></div>
+  <div id="result" class="result hidden"></div>
+</div>
+
+<script>
+const names = {
+  fonon:{title:"🎨 فنون",desc:"أنت شخص مبدع وبتشوفي الجمال في كل حاجة."},
+  mokhtare3:{title:"🧠 مخترع",desc:"بتفكري بطريقة مختلفة ودايمًا عندك أفكار جديدة."},
+  computer:{title:"💻 كمبيوتر",desc:"عندك مهارات تكنولوجية وبتتعلمي بسرعة."},
+  riyadi:{title:"🏃 رياضي",desc:"نشاطك وحبك للحركة بيميزك."},
+  mogtama3:{title:"❤️ مجتمع",desc:"قلبك كبير وبتحبي تساعدي الناس."},
+  mosa3ef:{title:"🚑 مسعف",desc:"بتتصرفي بسرعة في المواقف الصعبة."},
+  ra7ala:{title:"🌍 رحالة",desc:"بتحبي المغامرة واستكشاف الجديد."},
+  qiyada:{title:"🧭 قيادة",desc:"عندك روح قيادية وبتعرفي تنظمي."}
+};
+
+const questions = [
+{q:"لما تواجه مشكلة صعبة، أول رد فعل؟",a:[
+{t:"أفكر في حل جديد",v:"mokhtare3"},
+{t:"أطلب مساعدة",v:"mogtama3"},
+{t:"أتصرف بسرعة",v:"mosa3ef"},
+{t:"أحلل التفاصيل",v:"computer"}]},
+
+{q:"في مشروع جماعي، دورك غالبًا؟",a:[
+{t:"أقود الفريق",v:"qiyada"},
+{t:"أساعد الجميع",v:"mogtama3"},
+{t:"أبتكر الفكرة",v:"mokhtare3"},
+{t:"أنفذ بدقة",v:"computer"}]},
+
+{q:"لو عندك يوم فاضي تمامًا؟",a:[
+{t:"أتعلم حاجة جديدة",v:"mokhtare3"},
+{t:"أخرج وأستكشف",v:"ra7ala"},
+{t:"أرسم أو أصمم",v:"fonon"},
+{t:"أساعد ناس",v:"mogtama3"}]},
+
+{q:"إيه أكتر حاجة تزعجك؟",a:[
+{t:"الفوضى",v:"qiyada"},
+{t:"الملل",v:"ra7ala"},
+{t:"الروتين",v:"mokhtare3"},
+{t:"الإهمال",v:"mosa3ef"}]},
+
+{q:"لما حد يكون زعلان؟",a:[
+{t:"أحاول أساعده",v:"mosa3ef"},
+{t:"أستمع له",v:"mogtama3"},
+{t:"أفكر بحل",v:"mokhtare3"},
+{t:"أخفف عنه",v:"fonon"}]},
+
+{q:"أسلوبك في التعلم؟",a:[
+{t:"تجربة عملية",v:"mokhtare3"},
+{t:"شرح وقراءة",v:"computer"},
+{t:"مع فريق",v:"mogtama3"},
+{t:"بالحركة",v:"riyadi"}]},
+
+{q:"لو شفت مشكلة في الشارع؟",a:[
+{t:"أتدخل فورًا",v:"mosa3ef"},
+{t:"أنظم الناس",v:"qiyada"},
+{t:"أصور وأوثق",v:"computer"},
+{t:"أحاول أفهم",v:"mogtama3"}]},
+
+{q:"أقرب وصف لشخصيتك؟",a:[
+{t:"مبدع",v:"fonon"},
+{t:"تحليلي",v:"computer"},
+{t:"اجتماعي",v:"mogtama3"},
+{t:"مغامر",v:"ra7ala"}]},
+
+{q:"في وقت الضغط، أنتِ؟",a:[
+{t:"أفكر بهدوء",v:"mokhtare3"},
+{t:"أتصرف بسرعة",v:"mosa3ef"},
+{t:"أنظم الأمور",v:"qiyada"},
+{t:"أطلب دعم",v:"mogtama3"}]},
+
+{q:"لو عندك فكرة جديدة؟",a:[
+{t:"أجربها فورًا",v:"mokhtare3"},
+{t:"أخطط لها",v:"qiyada"},
+{t:"أشرحها للناس",v:"computer"},
+{t:"أشاركها مع فريق",v:"mogtama3"}]},
+
+{q:"تحبي أكثر شغل؟",a:[
+{t:"إبداع وتصميم",v:"fonon"},
+{t:"تحليل وأرقام",v:"computer"},
+{t:"مساعدة الناس",v:"mosa3ef"},
+{t:"قيادة فريق",v:"qiyada"}]},
+
+{q:"لو سافرتي مكان جديد؟",a:[
+{t:"أستكشف كل شيء",v:"ra7ala"},
+{t:"أصور وأوثق",v:"computer"},
+{t:"أرسم المكان",v:"fonon"},
+{t:"أتعرف على الناس",v:"mogtama3"}]},
+
+{q:"أكثر شيء يجذبك؟",a:[
+{t:"أفكار جديدة",v:"mokhtare3"},
+{t:"ناس مختلفة",v:"mogtama3"},
+{t:"تقنيات",v:"computer"},
+{t:"أماكن جديدة",v:"ra7ala"}]},
+
+{q:"في فريق، أنتِ؟",a:[
+{t:"القائدة",v:"qiyada"},
+{t:"المساعدة",v:"mogtama3"},
+{t:"المبدعة",v:"fonon"},
+{t:"المنفذة بدقة",v:"computer"}]},
+
+{q:"لو حد طلب مساعدتك؟",a:[
+{t:"أساعد فورًا",v:"mosa3ef"},
+{t:"أفكر بحل",v:"mokhtare3"},
+{t:"أدله على الطريق",v:"computer"},
+{t:"أشجعه",v:"mogtama3"}]},
+
+{q:"تحبّي أكثر؟",a:[
+{t:"الهدوء",v:"mokhtare3"},
+{t:"الحركة",v:"riyadi"},
+{t:"الناس",v:"mogtama3"},
+{t:"المغامرة",v:"ra7ala"}]},
+
+{q:"أسلوبك في الإبداع؟",a:[
+{t:"رسم وتصميم",v:"fonon"},
+{t:"ابتكار أفكار",v:"mokhtare3"},
+{t:"تنفيذ عملي",v:"computer"},
+{t:"تنظيم فريق",v:"qiyada"}]},
+
+{q:"لما تتعلمي شيء جديد؟",a:[
+{t:"أجربه",v:"mokhtare3"},
+{t:"أشرحه لغيري",v:"computer"},
+{t:"أطبقه مع ناس",v:"mogtama3"},
+{t:"أنظمه لنفسي",v:"qiyada"}]},
+
+{q:"أقوى نقطة فيك؟",a:[
+{t:"الإبداع",v:"fonon"},
+{t:"الذكاء",v:"mokhtare3"},
+{t:"السرعة",v:"mosa3ef"},
+{t:"التنظيم",v:"qiyada"}]},
+
+{q:"تحسي نفسك أقرب لـ؟",a:[
+{t:"مبتكرة",v:"mokhtare3"},
+{t:"قائدة",v:"qiyada"},
+{t:"فنانة",v:"fonon"},
+{t:"مساعدة للناس",v:"mogtama3"}]}
+];
+
+let index = 0;
+let scores = {
+  fonon:0,mokhtare3:0,computer:0,riyadi:0,
+  mogtama3:0,mosa3ef:0,ra7ala:0,qiyada:0
+};
+
+function showQuestion(){
+  let q = questions[index];
+  let html = `<div class='question'>${q.q}</div>`;
+
+  q.a.forEach(opt=>{
+    html += `<div class='option' onclick="answer('${opt.v}')">${opt.t}</div>`;
+  });
+
+  document.getElementById("quiz").innerHTML = html;
+  updateBar();
+}
+
+function answer(val){
+  if(val !== "none") scores[val]++;
+  index++;
+  if(index < questions.length) showQuestion();
+  else showResult();
+}
+
+function updateBar(){
+  let percent = (index / questions.length) * 100;
+  document.getElementById("bar").style.width = percent + "%";
+}
+
+function showResult(){
+  document.getElementById("quiz").classList.add("hidden");
+
+  let sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+
+  let topScores = [...new Set(sorted.map(x=>x[1]))].slice(0,3);
+
+  let finalBadges = [];
+
+  topScores.forEach(score=>{
+    sorted.forEach(([k,v])=>{
+      if(v === score && finalBadges.length < 3){
+        finalBadges.push({key:k,score:v});
+      }
+    });
+  });
+
+  let medals = ["🥇","🥈","🥉"];
+  let html = "✨ نتيجتك:<br>";
+
+  finalBadges.forEach((item,i)=>{
+    html += `
+      <div class='badge'>
+        ${medals[i]} ${names[item.key].title}
+        <div class='desc'>${names[item.key].desc}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = html;
+  document.getElementById("result").classList.remove("hidden");
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
